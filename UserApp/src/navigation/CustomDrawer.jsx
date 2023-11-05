@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, Pressable} from 'react-native';
 import {
   DrawerContentScrollView,
   DrawerItemList,
 } from '@react-navigation/drawer';
-import {Auth} from 'aws-amplify';
+import {Auth, API, graphqlOperation} from 'aws-amplify';
+import {listUsers} from '../graphql/queries';
 
 const CustomDrawer = props => {
   return (
@@ -28,7 +29,7 @@ const CustomDrawer = props => {
 
           <View>
             <Text style={{color: 'white', fontSize: 24}}>Sulochan</Text>
-            <Text style={{color: 'lightgrey'}}>5.00 *</Text>
+            <Text style={{color: 'lightgrey'}}>5 *</Text>
           </View>
         </View>
 

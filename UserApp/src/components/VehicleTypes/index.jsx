@@ -16,7 +16,7 @@ const VehicleTypes = ({typeState, onSubmit}) => {
           <VehicleTypeRow
             type={type}
             key={type.id}
-            isSelected={type.type === SelectedType}
+            isSelected={type.type === selectedType}
             onPress={() => setSelectedType(type.type)}
           />
         ))}

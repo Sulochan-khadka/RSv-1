@@ -1,33 +1,46 @@
 import React, {useState, useEffect} from 'react';
 import {Image, FlatList} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
-import {API, graphqlOperation} from 'aws-amplify';
+import {API, graphqlOperation, DataStore} from 'aws-amplify';
 import {listCars} from '../../graphql/queries';
+// import {Car} from '../../models';
 
-import cars from '../../assets/data/cars';
+// import cars from '../../assets/data/cars';
 
 const HomeMap = props => {
-  // const [cars,setCars]=useState([])
+  const [cars, setCars] = useState([]);
 
   useEffect(() => {
     const fetchCars = async () => {
       try {
         const response = await API.graphql(graphqlOperation(listCars));
         setCars(response.data.listCars.items);
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       }
     };
     fetchCars();
   }, []);
+
+  // useEffect(() => {
+  //   const fetchCars = async () => {
+  //     try {
+
+  //       DataStore.query(Car).then(setCars);
+  //     } catch (e) {
+  //       console.error(e);
+  //     }
+  //   };
+  //   fetchCars();
+  // }, []);
   const getImage = type => {
-    if (type === 'UberX') {
+    if (type === 'Basic') {
+      return require('../../assets/images/top-UberXL.png');
+    }
+    if (type === 'Economic') {
       return require('../../assets/images/top-UberX.png');
     }
-    if (type === 'Comfort') {
-      return require('../../assets/images/top-Comfort.png');
-    }
-    return require('../../assets/images/top-UberXL.png');
+    return require('../../assets/images/top-Comfort.png');
   };
 
   return (
@@ -38,8 +51,8 @@ const HomeMap = props => {
       initialRegion={{
         latitude: 22.80278,
         longitude: 86.18545,
-        latitudeDelta: 0.0222,
-        longitudeDelta: 0.0121,
+        latitudeDelta: 0.222,
+        longitudeDelta: 0.121,
       }}>
       {cars.map(car => (
         <Marker
