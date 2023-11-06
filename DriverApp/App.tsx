@@ -28,7 +28,7 @@ const App: () => React$Node = () => {
         const authenticatedUser = await Auth.currentAuthenticatedUser({
           bypassCache: true,
         });
-        console.log(authenticatedUser);
+        // console.log(authenticatedUser);
         if (!authenticatedUser) return;
         const carData = await API.graphql(
           graphqlOperation(getCarId, {id: authenticatedUser.attributes.sub}),
