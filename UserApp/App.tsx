@@ -48,6 +48,7 @@ const App: () => React.ReactNode = () => {
           email: authUser.attributes.email,
           name: authUser.attributes.name,
           phone_number: authUser.attributes.phone_number,
+          // preferred_username: authUser.attributes.preferred_username,
           ratings: 5,
         };
         const newUserResponse = await API.graphql(

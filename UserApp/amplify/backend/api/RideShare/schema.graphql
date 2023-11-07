@@ -7,7 +7,7 @@ type Order @model @auth(rules: [{allow: public}]) {
   originLongitude: Float!
   destLatitude: Float!
   destLongitude: Float!
-  userID: ID! @index(name: "byUser")
+  userID: ID @index(name: "byUser")
   carID: ID! @index(name: "byCar")
 }
 
@@ -18,7 +18,7 @@ type Car @model @auth(rules: [{allow: public}]) {
   longitude: Float
   heading: Float
   isActive: Boolean
-  Orders: [Order!] @hasMany(indexName: "byCar", fields: ["id"])
+  Orders: [Order] @hasMany(indexName: "byCar", fields: ["id"])
   User: User @belongsTo
 }
 

@@ -24,6 +24,10 @@ const SearchResults = props => {
     try {
       const userInfo = await Auth.currentAuthenticatedUser();
       const date = new Date();
+      console.log(
+        'The origin place latitude is :',
+        originPlace.details.geometry.location.lat,
+      );
       const input = {
         createdAt: date.toISOString(),
         type,
@@ -33,8 +37,10 @@ const SearchResults = props => {
         destLatitude: destinationPlace.details.geometry.location.lat,
         destLongitude: destinationPlace.details.geometry.location.lng,
 
-        userId: userInfo.attributes.sub,
-        carId: '1',
+        userID: userInfo.attributes.sub,
+        carID: '1',
+
+        status: 'NEW',
       };
       const response = await API.graphql(
         graphqlOperation(createOrder, {
@@ -54,7 +60,7 @@ const SearchResults = props => {
 
   return (
     <View style={{display: 'flex', justifyContent: 'space-between'}}>
-      <View style={{height: Dimensions.get('window').height - 400}}>
+      <View style={{height: Dimensions.get('window').height - 500}}>
         <RouteMap origin={originPlace} destination={destinationPlace} />
       </View>
 

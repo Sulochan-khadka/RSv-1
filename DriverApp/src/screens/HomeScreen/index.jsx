@@ -9,7 +9,7 @@ import NewOrderPopup from '../../components/NewOrderPopup';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 import {Auth, API, graphqlOperation} from 'aws-amplify';
-import {getCar} from '../../graphql/queries.js';
+import {getCar, listOrders} from '../../graphql/queries.js';
 import {updateCar} from '../../graphql/mutations.js';
 
 const origin = {latitude: 28.450927, longitude: -16.260845};
@@ -19,23 +19,9 @@ const GOOGLE_MAPS_APIKEY = 'AIzaSyAOypj3CE9FpjoZfGOGLPmNpjpkcYnA4CM';
 const HomeScreen = () => {
   const [car, setCar] = useState(null);
   // const [isOnline, setIsOnline] = useState(false);
-  const [myPosition, setMyPosition] = useState(null);
+  // const [myPosition, setMyPosition] = useState(null);
   const [order, setOrder] = useState(null);
-  const [newOrder, setNewOrder] = useState({
-    id: '1',
-    type: 'Basic',
-
-    originLatitude: 22.8057269,
-    originLongitude: 86.2018657,
-
-    destLatitude: 22.7914029,
-    destLongitude: 86.1805416,
-
-    user: {
-      rating: 4.8,
-      name: 'Rekha',
-    },
-  });
+  const [newOrders, setNewOrders] = useState([]);
 
   const fetchCar = async () => {
     try {
@@ -49,17 +35,39 @@ const HomeScreen = () => {
     }
   };
 
+  const fetchOrders = async () => {
+    try {
+      const ordersData = await API.graphql(
+        graphqlOperation(
+          listOrders,
+          // {filter: {status: {eq: 'NEW'}}}
+        ),
+      );
+      // if (!ordersData.data.listOrders.items.userID) {
+      //   console.log('Error: The userID is null :(');
+      //   return;
+      // }
+      // console.log(ordersData.data.listOrders.items);
+      setNewOrders(ordersData.data.listOrders.items);
+    } catch (error) {
+      console.log('Error');
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     fetchCar();
+    fetchOrders();
   }, []);
 
   const onDecline = () => {
-    setNewOrder(null);
+    setNewOrders(newOrders.slice(1));
   };
 
   const onAccept = newOrder => {
     setOrder(newOrder);
-    setNewOrder(null);
+    setNewOrders(newOrders.slice(1));
+    // console.log(newOrder);
   };
 
   const onGoPress = async () => {
@@ -75,16 +83,33 @@ const HomeScreen = () => {
       );
       setCar(updatedCarData.data.updateCar);
     } catch (error) {
+      console.log('error in update car');
       console.error(error);
     }
   };
 
-  const onUserLocationChange = event => {
-    setMyPosition(event.nativeEvent.coordinate);
+  const onUserLocationChange = async event => {
+    // setMyPosition(event.nativeEvent.coordinate);
+    const {latitude, longitude, heading} = event.nativeEvent.coordinate;
+    try {
+      const userData = await Auth.currentAuthenticatedUser();
+      const input = {
+        id: userData.attributes.sub,
+        latitude,
+        longitude,
+        heading,
+      };
+      const updatedCarData = await API.graphql(
+        graphqlOperation(updateCar, {input}),
+      );
+      setCar(updatedCarData.data.updateCar);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const onDirectionFound = event => {
-    console.log('Direction found: ', event);
+    // console.log('Direction found: ', event);
     if (order) {
       setOrder({
         ...order,
@@ -111,6 +136,8 @@ const HomeScreen = () => {
 
   const renderBottomTitle = () => {
     if (order && order.isFinished) {
+      // console.log(order);
+
       return (
         <View style={{alignItems: 'center'}}>
           <View
@@ -126,7 +153,7 @@ const HomeScreen = () => {
               RIDE COMPLETED
             </Text>
           </View>
-          <Text style={styles.bottomText}>{order.user.name}</Text>
+          {/* <Text style={styles.bottomText}>{order.user.name}</Text> */}
         </View>
       );
     }
@@ -150,7 +177,10 @@ const HomeScreen = () => {
             </View>
             <Text>{order.distance ? order.distance.toFixed(1) : '?'} km</Text>
           </View>
-          <Text style={styles.bottomText}>Dropping off {order.user.name}</Text>
+          <Text style={styles.bottomText}>
+            Dropping off
+            {/* {order.user.name} */}
+          </Text>
         </View>
       );
     }
@@ -174,7 +204,10 @@ const HomeScreen = () => {
             </View>
             <Text>{order.distance ? order.distance.toFixed(1) : '?'} km</Text>
           </View>
-          <Text style={styles.bottomText}>Picking up {order.user.name}</Text>
+          <Text style={styles.bottomText}>
+            Picking up
+            {/* {order.user.name} */}
+          </Text>
         </View>
       );
     }
@@ -199,7 +232,7 @@ const HomeScreen = () => {
         }}>
         {order && (
           <MapViewDirections
-            origin={myPosition}
+            origin={{latitude: car?.latitude, longitude: car?.longitude}}
             onReady={onDirectionFound}
             destination={getDestination()}
             apikey={GOOGLE_MAPS_APIKEY}
@@ -251,13 +284,13 @@ const HomeScreen = () => {
         <Entypo name={'menu'} size={30} color="#4a4a4a" />
       </View>
 
-      {newOrder && (
+      {newOrders.length > 0 && !order && (
         <NewOrderPopup
-          newOrder={newOrder}
+          newOrder={newOrders[0]}
           duration={2}
           distance={0.5}
           onDecline={onDecline}
-          onAccept={() => onAccept(newOrder)}
+          onAccept={() => onAccept(newOrders[0])}
         />
       )}
     </View>

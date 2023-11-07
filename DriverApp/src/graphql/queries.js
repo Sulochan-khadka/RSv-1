@@ -33,3 +33,30 @@ export const getCar = /* GraphQL */ `
     }
   }
 `;
+
+export const listOrders = /* GraphQL */ `
+  query ListOrders(
+    $filter: ModelOrderFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listOrders(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        createdAt
+        type
+        status
+        originLatitude
+        originLongitude
+        destLatitude
+        destLongitude
+        userID
+        carID
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
