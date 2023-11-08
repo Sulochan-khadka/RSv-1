@@ -10,7 +10,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 import {Auth, API, graphqlOperation} from 'aws-amplify';
 import {getCar, listOrders} from '../../graphql/queries.js';
-import {updateCar} from '../../graphql/mutations.js';
+import {updateCar, updateOrder} from '../../graphql/mutations.js';
 
 const origin = {latitude: 28.450927, longitude: -16.260845};
 const destination = {latitude: 22.8042344, longitude: 86.1841245};
@@ -38,10 +38,7 @@ const HomeScreen = () => {
   const fetchOrders = async () => {
     try {
       const ordersData = await API.graphql(
-        graphqlOperation(
-          listOrders,
-          // {filter: {status: {eq: 'NEW'}}}
-        ),
+        graphqlOperation(listOrders, {filter: {status: {eq: 'NEW'}}}),
       );
       // if (!ordersData.data.listOrders.items.userID) {
       //   console.log('Error: The userID is null :(');
@@ -64,8 +61,20 @@ const HomeScreen = () => {
     setNewOrders(newOrders.slice(1));
   };
 
-  const onAccept = newOrder => {
-    setOrder(newOrder);
+  const onAccept = async newOrder => {
+    try {
+      const input = {
+        id: newOrder.id,
+        status: 'PICKING_UP_CLIENT',
+        carID: car.id,
+      };
+      const orderData = await API.graphql(
+        graphqlOperation(updateOrder, {input}),
+      );
+      setOrder(orderData.data.updateOrder);
+    } catch (error) {
+      console.error(error);
+    }
     setNewOrders(newOrders.slice(1));
     // console.log(newOrder);
   };
@@ -77,6 +86,7 @@ const HomeScreen = () => {
       const input = {
         id: userData.attributes.sub,
         isActive: !car.isActive,
+        carUserId: userData.attributes.sub,
       };
       const updatedCarData = await API.graphql(
         graphqlOperation(updateCar, {input}),

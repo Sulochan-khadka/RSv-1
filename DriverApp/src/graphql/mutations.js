@@ -37,3 +37,24 @@ export const updateCar = /* GraphQL */ `
     }
   }
 `;
+export const updateOrder = /* GraphQL */ `
+  mutation UpdateOrder(
+    $input: UpdateOrderInput!
+    $condition: ModelOrderConditionInput
+  ) {
+    updateOrder(input: $input, condition: $condition) {
+      id
+      createdAt
+      type
+      status
+      originLatitude
+      originLongitude
+      destLatitude
+      destLongitude
+      userID
+      carID
+      updatedAt
+      __typename
+    }
+  }
+`;

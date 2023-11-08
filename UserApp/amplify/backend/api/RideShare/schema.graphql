@@ -31,4 +31,8 @@ type User @model @auth(rules: [{allow: public}]) {
   ratings: Int
   Car: Car @hasOne
 }
- 
+
+type Subscription {
+  onOrderUpdated(id: ID!): Order @aws_subscribe(mutations: ["updateOrder"])
+  onCarUpdated(id: ID!): Car @aws_subscribe(mutations: ["updateCar"])
+}

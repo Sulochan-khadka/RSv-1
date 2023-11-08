@@ -47,12 +47,7 @@ const SearchResults = props => {
           input: input,
         }),
       );
-      Alert.alert('Hurraaay', 'Your order has been submited', [
-        {
-          text: 'Go home',
-          onPress: () => navigation.navigate('Home'),
-        },
-      ]);
+      navigation.navigate('OrderPage', {id: response.data.createOrder.id});
     } catch (e) {
       console.error(e);
     }
